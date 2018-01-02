@@ -7,7 +7,7 @@ Requirements
 ------------
 
 1. Java 9
-2. Python 3
+2. Python 3.6
 
 ::
 
