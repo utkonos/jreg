@@ -35,6 +35,7 @@ https://checkerframework.org/tutorial/src/RegexExample.java
 
 import base64
 import pathlib
+import shutil
 import subprocess
 import tempfile
 
@@ -55,7 +56,7 @@ regex_checker += 'ABIHABMHABMHABQHABUAAAMAAQAWAAAAAgAX'
 class JavaRegex:
     """Class for handling all java regex functionality."""
 
-    def __init__(self, javapath=pathlib.Path('java'), debug=False):
+    def __init__(self, javapath=pathlib.Path('java'), custom_regex_checker_class_path=None, debug=False):
         """Instantiate the class."""
         self.javapath = javapath
         self.debug = debug
@@ -65,13 +66,22 @@ class JavaRegex:
 
         regex_checker_class = base64.b64decode(regex_checker)
 
-        class_path = self._path.joinpath('RegexChecker.class')
-        with open(class_path, 'wb') as fh:
-            fh.write(regex_checker_class)
+        # if there is no custom regex checker class given, use the default one
+        if custom_regex_checker_class_path is None:
+            class_path = self._path.joinpath('RegexChecker.class')
+            self.java_command = 'RegexChecker'
+            with open(class_path, 'wb') as fh:
+                fh.write(regex_checker_class)
+        # if the path to a custom regex checker class is given, copy it into the temp. directory
+        else:
+            file_name = custom_regex_checker_class_path.split('/')[-1]
+            self.java_command = file_name.split('.class')[0]
+            class_path = self._path.joinpath(file_name)
+            shutil.copyfile(custom_regex_checker_class_path, class_path)
 
     def match(self, regex, string):
         """Perform the regex match. Requires a raw string as regex input."""
-        command = [self.javapath, 'RegexChecker', "'{}'".format(regex), "'{}'".format(string)]
+        command = [self.javapath, self.java_command, "'{}'".format(regex), "'{}'".format(string)]
 
         process = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=self._temp_dir.name)
         result = process.stdout.decode().strip().strip("'")
