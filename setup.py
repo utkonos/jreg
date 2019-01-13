@@ -1,19 +1,9 @@
 #!/usr/bin/env python3
 """Setuptools-based setup.py."""
-
 import pathlib
-import re
-import subprocess
 
 from codecs import open
 from setuptools import setup, find_packages
-
-# Check if Java is installed and is the correct version
-process = subprocess.run(['java', '-version'], stderr=subprocess.PIPE)
-try:
-    assert re.match(b'java version "9\..+', process.stderr.splitlines()[0])
-except AssertionError:
-    print('Please install Java version 9')
 
 # Get the long description from the README file
 here = pathlib.Path(__file__).parent
